@@ -1,0 +1,175 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas AR - Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f4f7fa; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0;
+        }
+        .main-card {
+            background: #ffffff;
+            border-radius: 3rem;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
+        }
+        .input-field {
+            background-color: #f8fafc;
+            border: 2px solid #f1f5f9;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus-within {
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="main-card w-full max-w-[440px] p-10 space-y-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Finanzas AR</h1>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <p id="status" class="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.15em]">Datos Actualizados</p>
+                </div>
+            </div>
+            <div class="bg-blue-600 p-4 rounded-[1.5rem] shadow-xl shadow-blue-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="space-y-6">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-2.5 ml-1 tracking-widest">Moneda de origen</label>
+                <select id="currencySelect" class="input-field w-full text-slate-700 text-sm rounded-2xl p-4 font-semibold outline-none cursor-pointer">
+                    <option value="USD">🇺🇸 Dólar Oficial</option>
+                    <option value="EUR">🇪🇺 Euro Oficial</option>
+                    <option value="BRL">🇧🇷 Real Brasileño</option>
+                    <option value="UYU">🇺🇾 Peso Uruguayo</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-2.5 ml-1 tracking-widest">Monto a convertir</label>
+                <input type="number" id="amountInput" value="1" class="input-field w-full text-slate-900 text-2xl font-extrabold rounded-2xl p-4 outline-none" placeholder="0">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="input-field p-4 rounded-2xl">
+                    <span class="block text-[9px] text-slate-400 font-bold uppercase mb-1 tracking-tighter">Compra</span>
+                    <div class="flex items-baseline">
+                        <span class="text-slate-400 text-xs mr-1 font-bold">$</span>
+                        <input type="number" id="buyInput" class="w-full bg-transparent font-bold text-slate-700 outline-none text-lg" step="0.01">
+                    </div>
+                </div>
+                <div class="input-field p-4 rounded-2xl">
+                    <span class="block text-[9px] text-slate-400 font-bold uppercase mb-1 tracking-tighter">Venta</span>
+                    <div class="flex items-baseline">
+                        <span class="text-slate-400 text-xs mr-1 font-bold">$</span>
+                        <input type="number" id="sellInput" class="w-full bg-transparent font-bold text-slate-700 outline-none text-lg" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Resultado -->
+        <div class="bg-slate-900 rounded-[2.5rem] p-8 text-center shadow-2xl relative overflow-hidden">
+            <!-- Decoración sutil -->
+            <div class="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
+            
+            <span id="avgLabel" class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.2em] block mb-3 opacity-80">Cargando cotización...</span>
+            <div id="result" class="text-4xl font-black text-white tracking-tight">
+                $ 0,00
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="space-y-4">
+            <button onclick="fetchRates()" class="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-200 active:scale-[0.97] text-sm tracking-widest">
+                ACTUALIZAR DATOS
+            </button>
+            <p class="text-[10px] text-center text-slate-400 font-medium leading-relaxed px-4">
+                Información oficial del BCRA obtenida en tiempo real a través de DolarApi.com
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const currencySelect = document.getElementById('currencySelect');
+        const amountInput = document.getElementById('amountInput');
+        const buyInput = document.getElementById('buyInput');
+        const sellInput = document.getElementById('sellInput');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const avgLabel = document.getElementById('avgLabel');
+
+        const endpoints = {
+            'USD': 'https://dolarapi.com/v1/dolares/oficial',
+            'EUR': 'https://dolarapi.com/v1/cotizaciones/eur',
+            'BRL': 'https://dolarapi.com/v1/cotizaciones/brl',
+            'UYU': 'https://dolarapi.com/v1/cotizaciones/uyu'
+        };
+
+        async function fetchRates() {
+            const curr = currencySelect.value;
+            statusDiv.innerText = "Sincronizando...";
+            statusDiv.className = "text-[10px] font-bold text-amber-500 uppercase tracking-[0.15em] mt-1";
+
+            try {
+                const res = await fetch(endpoints[curr]);
+                const data = await res.json();
+                
+                buyInput.value = data.compra;
+                sellInput.value = data.venta;
+                
+                statusDiv.innerText = "Datos Actualizados";
+                statusDiv.className = "text-[10px] font-bold text-emerald-600 uppercase tracking-[0.15em] mt-1";
+                convert();
+            } catch (e) {
+                statusDiv.innerText = "Error de Red";
+                statusDiv.className = "text-[10px] font-bold text-red-500 uppercase tracking-[0.15em] mt-1";
+            }
+        }
+
+        function convert() {
+            const amount = parseFloat(amountInput.value) || 0;
+            const sellPrice = parseFloat(sellInput.value) || 0;
+            const total = amount * sellPrice;
+            
+            avgLabel.innerText = `1 ${currencySelect.value} = ARS ${sellPrice.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
+            resultDiv.innerText = total.toLocaleString('es-AR', { 
+                style: 'currency', 
+                currency: 'ARS',
+                minimumFractionDigits: 2
+            });
+        }
+
+        currencySelect.addEventListener('change', fetchRates);
+        [amountInput, buyInput, sellInput].forEach(el => el.addEventListener('input', convert));
+
+        window.onload = fetchRates;
+    </script>
+</body>
+</html>
+
+```
+
