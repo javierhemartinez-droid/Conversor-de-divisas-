@@ -1,0 +1,192 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONVERSOR DE DIVISAS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .main-card {
+            background: #ffffff;
+            border-radius: 3rem;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+        }
+        .input-group {
+            background-color: #f8fafc;
+            border: 2px solid #f1f5f9;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        .input-group:focus-within {
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.05);
+        }
+        select, input {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+            font-weight: 700;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-10">
+            <div class="space-y-1">
+                <h1 class="text-xl font-extrabold text-slate-900 tracking-tighter leading-none">CONVERSOR DE DIVISAS</h1>
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <p id="status" class="text-[9px] font-bold text-emerald-600 uppercase tracking-[0.2em]">Datos en tiempo real</p>
+                </div>
+            </div>
+            <div class="bg-blue-600 p-4 rounded-2xl shadow-xl shadow-blue-200 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="space-y-6">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2.5 ml-1 tracking-widest">Seleccionar Moneda</label>
+                <div class="input-group">
+                    <select id="currencySelect" class="text-slate-700 text-sm cursor-pointer">
+                        <option value="USD">🇺🇸 Dólar Oficial</option>
+                        <option value="EUR">🇪🇺 Euro Oficial</option>
+                        <option value="BRL">🇧🇷 Real Brasileño</option>
+                        <option value="UYU">🇺🇾 Peso Uruguayo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2.5 ml-1 tracking-widest">Monto a cambiar</label>
+                <div class="input-group">
+                    <input type="number" id="amountInput" value="1" class="text-slate-900 text-2xl">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="input-group">
+                    <span class="block text-[8px] text-slate-400 font-bold uppercase mb-1 tracking-tighter">Compra</span>
+                    <div class="flex items-center text-slate-700 font-bold">
+                        <span class="text-xs opacity-40 mr-1">$</span>
+                        <input type="number" id="buyInput" class="text-base" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <span class="block text-[8px] text-slate-400 font-bold uppercase mb-1 tracking-tighter">Venta</span>
+                    <div class="flex items-center text-slate-700 font-bold">
+                        <span class="text-xs opacity-40 mr-1">$</span>
+                        <input type="number" id="sellInput" class="text-base" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Resultado -->
+        <div class="bg-slate-900 rounded-[2.5rem] p-8 text-center mt-10 mb-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <span id="avgLabel" class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.25em] block mb-3 opacity-90">Sincronizando...</span>
+            <div id="result" class="text-4xl font-black text-white tracking-tight">
+                $ 0,00
+            </div>
+        </div>
+
+        <!-- Botón Actualizar -->
+        <button onclick="fetchRates()" class="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl transition-all shadow-lg shadow-blue-100 active:scale-[0.97] text-xs tracking-widest uppercase mb-6">
+            Actualizar Cotización
+        </button>
+        
+        <p class="text-[10px] text-center text-slate-400 font-medium italic opacity-70">
+            Tipo de cambio oficial BCRA • DolarApi.com
+        </p>
+    </div>
+
+    <script>
+        const currencySelect = document.getElementById('currencySelect');
+        const amountInput = document.getElementById('amountInput');
+        const buyInput = document.getElementById('buyInput');
+        const sellInput = document.getElementById('sellInput');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const avgLabel = document.getElementById('avgLabel');
+
+        const endpoints = {
+            'USD': 'https://dolarapi.com/v1/dolares/oficial',
+            'EUR': 'https://dolarapi.com/v1/cotizaciones/eur',
+            'BRL': 'https://dolarapi.com/v1/cotizaciones/brl',
+            'UYU': 'https://dolarapi.com/v1/cotizaciones/uyu'
+        };
+
+        async function fetchRates() {
+            const curr = currencySelect.value;
+            statusDiv.innerText = "Sincronizando...";
+            statusDiv.classList.replace('text-emerald-600', 'text-amber-500');
+
+            try {
+                const res = await fetch(endpoints[curr]);
+                const data = await res.json();
+                
+                buyInput.value = data.compra;
+                sellInput.value = data.venta;
+                
+                statusDiv.innerText = "Datos en tiempo real";
+                statusDiv.classList.replace('text-amber-500', 'text-emerald-600');
+                convert();
+            } catch (e) {
+                statusDiv.innerText = "Error de conexión";
+                statusDiv.classList.replace('text-emerald-600', 'text-red-500');
+            }
+        }
+
+        function convert() {
+            const amount = parseFloat(amountInput.value) || 0;
+            const sellPrice = parseFloat(sellInput.value) || 0;
+            const total = amount * sellPrice;
+            
+            avgLabel.innerText = `1 ${currencySelect.value} = ARS ${sellPrice.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
+            resultDiv.innerText = total.toLocaleString('es-AR', { 
+                style: 'currency', 
+                currency: 'ARS',
+                minimumFractionDigits: 2
+            });
+        }
+
+        currencySelect.addEventListener('change', fetchRates);
+        [amountInput, buyInput, sellInput].forEach(el => el.addEventListener('input', convert));
+
+        window.onload = fetchRates;
+    </script>
+</body>
+</html>
+
+```
